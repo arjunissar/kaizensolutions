@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../core/responsive/breakpoints.dart';
@@ -12,7 +13,6 @@ import '../../core/theme/app_typography.dart';
 import '../../shared/widgets/animated_reveal.dart';
 import '../../shared/widgets/page_scroll_view.dart';
 import '../../shared/widgets/tap_scale.dart';
-import 'widgets/hero_motion.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -120,11 +120,11 @@ class _HeroSectionState extends State<_HeroSection>
   @override
   Widget build(BuildContext context) {
     // FUTURE: When real product photography is available, the right
-    // column (HeroMotion) can be replaced with a single full-bleed
-    // photograph of the notebook. Recommended composition: notebook
-    // open on a wooden surface, warm natural light, ~3/4 angle,
-    // shallow depth of field. The pull-quote can move into a separate
-    // section further down the page.
+    // column (currently the Lottie animation) can be replaced with a
+    // single full-bleed photograph of the notebook. Recommended
+    // composition: notebook open on a wooden surface, warm natural light,
+    // ~3/4 angle, shallow depth of field. The pull-quote can move into a
+    // separate section further down the page.
     final size = MediaQuery.sizeOf(context);
     final isDesktop = size.width > Breakpoints.tablet;
     final heroHeight = math.max(size.height, 720.0);
@@ -165,12 +165,52 @@ class _HeroSectionState extends State<_HeroSection>
                           child: _HeroLeftCol(stagger: _stagger),
                         ),
                         const SizedBox(width: AppSpacing.s64),
-                        const Expanded(flex: 5, child: HeroMotion()),
+                        Expanded(
+                          flex: 5,
+                          child: _HeroLottie(animate: !reduceMotion),
+                        ),
                       ],
                     )
-                  : _HeroLeftCol(stagger: _stagger),
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _HeroLeftCol(stagger: _stagger),
+                        const SizedBox(height: AppSpacing.s48),
+                        Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 320),
+                            child: _HeroLottie(animate: !reduceMotion),
+                          ),
+                        ),
+                      ],
+                    ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HeroLottie extends StatelessWidget {
+  const _HeroLottie({required this.animate});
+
+  final bool animate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      // Decorative — the adjacent headline and body copy already carry
+      // the hero's meaning.
+      excludeSemantics: true,
+      child: AspectRatio(
+        // Matches animations/1.json's native composition (1080x950).
+        aspectRatio: 1080 / 950,
+        child: Lottie.asset(
+          'assets/animations/1.json',
+          animate: animate,
+          repeat: true,
+          fit: BoxFit.contain,
         ),
       ),
     );

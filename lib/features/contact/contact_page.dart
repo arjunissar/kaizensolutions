@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/responsive/breakpoints.dart';
@@ -34,8 +35,8 @@ class _HeroSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenW = MediaQuery.sizeOf(context).width;
-    final headlineSize = (screenW * 0.075).clamp(48.0, 72.0);
     final isDesktop = screenW > Breakpoints.tablet;
+    final reduceMotion = MediaQuery.of(context).disableAnimations;
 
     return ColoredBox(
       color: kaizenCream,
@@ -48,49 +49,118 @@ class _HeroSection extends StatelessWidget {
         ),
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: AppSpacing.maxReadingWidth,
+            constraints: BoxConstraints(
+              maxWidth: isDesktop
+                  ? AppSpacing.maxContentWidth
+                  : AppSpacing.maxReadingWidth,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AnimatedReveal(
-                  child: Text(
-                    'Let\'s Talk',
-                    style: GoogleFonts.fraunces(
-                      fontSize: 18,
-                      fontStyle: FontStyle.italic,
-                      fontWeight: FontWeight.w500,
-                      height: 1.15,
-                      color: kaizenMuted,
-                    ),
+            child: isDesktop
+                ? Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Expanded(flex: 7, child: _HeroText()),
+                      const SizedBox(width: AppSpacing.s64),
+                      Expanded(
+                        flex: 4,
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 200),
+                            child: _ContactLottie(animate: !reduceMotion),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const _HeroText(),
+                      const SizedBox(height: AppSpacing.s40),
+                      Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 160),
+                          child: _ContactLottie(animate: !reduceMotion),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: AppSpacing.s16),
-                AnimatedReveal(
-                  delay: const Duration(milliseconds: 80),
-                  child: Text(
-                    'Request a Proposal.',
-                    style: GoogleFonts.fraunces(
-                      fontSize: headlineSize,
-                      fontWeight: FontWeight.w700,
-                      height: 1.05,
-                      color: kaizenInk,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.s24),
-                AnimatedReveal(
-                  delay: const Duration(milliseconds: 160),
-                  child: Text(
-                    'Tell us about your school and what you\'re looking for. '
-                    'We\'ll reply within two working days with a tailored proposal.',
-                    style: AppTypography.bodyL.copyWith(color: kaizenMuted),
-                  ),
-                ),
-              ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HeroText extends StatelessWidget {
+  const _HeroText();
+
+  @override
+  Widget build(BuildContext context) {
+    final screenW = MediaQuery.sizeOf(context).width;
+    final headlineSize = (screenW * 0.075).clamp(48.0, 72.0);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AnimatedReveal(
+          child: Text(
+            'Let\'s Talk',
+            style: GoogleFonts.fraunces(
+              fontSize: 18,
+              fontStyle: FontStyle.italic,
+              fontWeight: FontWeight.w500,
+              height: 1.15,
+              color: kaizenMuted,
             ),
           ),
+        ),
+        const SizedBox(height: AppSpacing.s16),
+        AnimatedReveal(
+          delay: const Duration(milliseconds: 80),
+          child: Text(
+            'Request a Proposal.',
+            style: GoogleFonts.fraunces(
+              fontSize: headlineSize,
+              fontWeight: FontWeight.w700,
+              height: 1.05,
+              color: kaizenInk,
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.s24),
+        AnimatedReveal(
+          delay: const Duration(milliseconds: 160),
+          child: Text(
+            'Tell us about your school and what you\'re looking for. '
+            'We\'ll reply within two working days with a tailored proposal.',
+            style: AppTypography.bodyL.copyWith(color: kaizenMuted),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ContactLottie extends StatelessWidget {
+  const _ContactLottie({required this.animate});
+
+  final bool animate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      // Decorative — the adjacent heading and body copy already carry
+      // the section's meaning.
+      excludeSemantics: true,
+      child: AspectRatio(
+        // Matches animations/3.json's native composition (640x640).
+        aspectRatio: 1,
+        child: Lottie.asset(
+          'assets/animations/3.json',
+          animate: animate,
+          repeat: true,
+          fit: BoxFit.contain,
         ),
       ),
     );

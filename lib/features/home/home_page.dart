@@ -681,6 +681,9 @@ class _WhatItIsSection extends StatelessWidget {
   }
 }
 
+// Keeps the hover lift/shadow (a nice tactile touch on desktop) but drops
+// the arrow that used to fade in — these cards aren't links or buttons, so
+// nothing here should imply they're clickable.
 class _WhatItIsCard extends StatefulWidget {
   const _WhatItIsCard({
     required this.numeral,
@@ -746,18 +749,6 @@ class _WhatItIsCardState extends State<_WhatItIsCard> {
               widget.body,
               style: AppTypography.bodyM.copyWith(color: kaizenMuted),
             ),
-            const SizedBox(height: AppSpacing.s24),
-            AnimatedOpacity(
-              duration: const Duration(milliseconds: 200),
-              opacity: _hovered ? 1.0 : 0.0,
-              child: Align(
-                alignment: Alignment.bottomRight,
-                child: Text(
-                  '→',
-                  style: AppTypography.headingM.copyWith(color: kaizenGold),
-                ),
-              ),
-            ),
           ],
         ),
       ),
@@ -781,8 +772,9 @@ class _StatsStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop =
-        MediaQuery.sizeOf(context).width > Breakpoints.tablet;
+    final width = MediaQuery.sizeOf(context).width;
+    final isDesktop = width > Breakpoints.tablet;
+    final isMobile = width < Breakpoints.mobile;
 
     return Container(
       color: kaizenCream,
@@ -790,8 +782,8 @@ class _StatsStrip extends StatelessWidget {
         children: [
           const Divider(height: 1, color: kaizenPaper),
           _section(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.s32,
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? AppSpacing.s24 : AppSpacing.s32,
               vertical: AppSpacing.s64,
             ),
             child: isDesktop
@@ -818,22 +810,38 @@ class _StatsStrip extends StatelessWidget {
                       ],
                     ),
                   )
-                : Wrap(
-                    spacing: AppSpacing.s32,
-                    runSpacing: AppSpacing.s32,
-                    children: [
-                      for (final s in _stats)
-                        SizedBox(
-                          width:
-                              (MediaQuery.sizeOf(context).width - 80) / 2,
-                          child: _Stat(
-                            value: s.$1,
-                            unit: s.$2,
-                            description: s.$3,
-                          ),
-                        ),
-                    ],
-                  ),
+                : isMobile
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          for (int i = 0; i < _stats.length; i++) ...[
+                            if (i > 0)
+                              const SizedBox(height: AppSpacing.s32),
+                            _Stat(
+                              value: _stats[i].$1,
+                              unit: _stats[i].$2,
+                              description: _stats[i].$3,
+                              valueFontSize: 40,
+                              horizontalPadding: 0,
+                            ),
+                          ],
+                        ],
+                      )
+                    : Wrap(
+                        spacing: AppSpacing.s32,
+                        runSpacing: AppSpacing.s32,
+                        children: [
+                          for (final s in _stats)
+                            SizedBox(
+                              width: (width - 80) / 2,
+                              child: _Stat(
+                                value: s.$1,
+                                unit: s.$2,
+                                description: s.$3,
+                              ),
+                            ),
+                        ],
+                      ),
           ),
           const Divider(height: 1, color: kaizenPaper),
         ],
@@ -847,16 +855,20 @@ class _Stat extends StatelessWidget {
     required this.value,
     required this.unit,
     required this.description,
+    this.valueFontSize = 60,
+    this.horizontalPadding = AppSpacing.s24,
   });
 
   final String value;
   final String unit;
   final String description;
+  final double valueFontSize;
+  final double horizontalPadding;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s24),
+      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -864,7 +876,7 @@ class _Stat extends StatelessWidget {
           Text(
             value,
             style: GoogleFonts.fraunces(
-              fontSize: 60,
+              fontSize: valueFontSize,
               fontWeight: FontWeight.w700,
               height: 1.0,
               color: kaizenGold,

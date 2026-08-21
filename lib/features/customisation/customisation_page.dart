@@ -70,13 +70,15 @@ class _HeroSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               AnimatedReveal(
+                // kaizenGold text on kaizenCream fails WCAG contrast
+                // (~1.4:1); kaizenBlueDeep is the same premium accent, safe.
                 child: Text(
                   'Customisation',
                   style: GoogleFonts.fraunces(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                     height: 1.15,
-                    color: kaizenGold,
+                    color: kaizenBlueDeep,
                   ),
                 ),
               ),
@@ -84,7 +86,7 @@ class _HeroSection extends StatelessWidget {
               AnimatedReveal(
                 delay: const Duration(milliseconds: 80),
                 child: Text(
-                  'Your school.\nYour notebook.',
+                  'Your school.\nYour notebook.'.breaks(keep: isDesktop),
                   style: GoogleFonts.fraunces(
                     fontSize: headlineSize,
                     fontWeight: FontWeight.w700,
@@ -97,8 +99,9 @@ class _HeroSection extends StatelessWidget {
               AnimatedReveal(
                 delay: const Duration(milliseconds: 160),
                 child: ConstrainedBox(
-                  constraints:
-                      const BoxConstraints(maxWidth: AppSpacing.maxReadingWidth),
+                  constraints: const BoxConstraints(
+                    maxWidth: AppSpacing.maxReadingWidth,
+                  ),
                   child: Text(
                     'Every Kaizen Notebook is built to order. Choose the paper, the size, '
                     'the pages, the subjects — or let us recommend a configuration based '
@@ -179,9 +182,7 @@ class _OptionCardsSection extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: AnimatedReveal(child: paperCard),
-                      ),
+                      Expanded(child: AnimatedReveal(child: paperCard)),
                       const SizedBox(width: AppSpacing.s24),
                       Expanded(
                         child: AnimatedReveal(
@@ -214,7 +215,12 @@ class _OptionCardsSection extends StatelessWidget {
               )
             : Column(
                 children: [
-                  for (final card in [paperCard, sizeCard, pageCard, bifCard]) ...[
+                  for (final card in [
+                    paperCard,
+                    sizeCard,
+                    pageCard,
+                    bifCard,
+                  ]) ...[
                     AnimatedReveal(child: card),
                     const SizedBox(height: AppSpacing.s16),
                   ],
@@ -259,7 +265,12 @@ class _OptionCard extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: kaizenGold,
                 ),
-                child: Icon(icon, size: 20, color: kaizenBlue, semanticLabel: null),
+                child: Icon(
+                  icon,
+                  size: 20,
+                  color: kaizenBlue,
+                  semanticLabel: null,
+                ),
               ),
               const SizedBox(width: AppSpacing.s16),
               Expanded(
@@ -365,9 +376,7 @@ class _AlsoIncludedSection extends StatelessWidget {
                     spacing: AppSpacing.s8,
                     runSpacing: AppSpacing.s8,
                     alignment: WrapAlignment.center,
-                    children: [
-                      for (final chip in _chips) _AlsoChip(chip),
-                    ],
+                    children: [for (final chip in _chips) _AlsoChip(chip)],
                   ),
                 ),
               ],
@@ -396,10 +405,7 @@ class _AlsoChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(100),
         border: Border.all(color: kaizenGold.withValues(alpha: 0.6)),
       ),
-      child: Text(
-        label,
-        style: AppTypography.bodyS.copyWith(color: kaizenInk),
-      ),
+      child: Text(label, style: AppTypography.bodyS.copyWith(color: kaizenInk)),
     );
   }
 }
@@ -412,21 +418,13 @@ class _OrderingTimelineSection extends StatelessWidget {
   const _OrderingTimelineSection();
 
   static const _steps = [
-    (
-      '1',
-      'Discover',
-      'We learn your school\'s curriculum pattern and needs.',
-    ),
+    ('1', 'Discover', 'We learn your school\'s curriculum pattern and needs.'),
     (
       '2',
       'Design',
       'We draft class-wise and subject-wise specifications with you.',
     ),
-    (
-      '3',
-      'Approve',
-      'You sign off on specs, quantities and branding.',
-    ),
+    ('3', 'Approve', 'You sign off on specs, quantities and branding.'),
     (
       '4',
       'Deliver',
@@ -520,7 +518,9 @@ class _VerticalTimeline extends StatelessWidget {
                     children: [
                       Text(
                         steps[i].$2,
-                        style: AppTypography.headingS.copyWith(color: kaizenInk),
+                        style: AppTypography.headingS.copyWith(
+                          color: kaizenInk,
+                        ),
                       ),
                       const SizedBox(height: AppSpacing.s4),
                       Text(
@@ -670,10 +670,7 @@ class _FaqSection extends StatelessWidget {
                   child: Column(
                     children: [
                       for (int i = 0; i < _faqs.length; i++) ...[
-                        _FaqTile(
-                          question: _faqs[i].$1,
-                          answer: _faqs[i].$2,
-                        ),
+                        _FaqTile(question: _faqs[i].$1, answer: _faqs[i].$2),
                         if (i < _faqs.length - 1)
                           const Divider(
                             height: 1,
@@ -728,10 +725,7 @@ class _FaqTile extends StatelessWidget {
           ),
         ),
         children: [
-          Text(
-            answer,
-            style: AppTypography.bodyM.copyWith(color: kaizenMuted),
-          ),
+          Text(answer, style: AppTypography.bodyM.copyWith(color: kaizenMuted)),
         ],
       ),
     );
@@ -761,7 +755,9 @@ class _ClosingCtaSection extends StatelessWidget {
           children: [
             AnimatedReveal(
               child: Text(
-                'Let\'s design a notebook\nfor your school.',
+                'Let\'s design a notebook\nfor your school.'.breaks(
+                  keep: isDesktop,
+                ),
                 style: GoogleFonts.fraunces(
                   fontSize: isDesktop ? 48 : 36,
                   fontWeight: FontWeight.w700,
@@ -775,7 +771,8 @@ class _ClosingCtaSection extends StatelessWidget {
             AnimatedReveal(
               delay: const Duration(milliseconds: 60),
               child: Text(
-                'Tell us about your school and we\'ll put together\na tailored proposal — at no obligation.',
+                'Tell us about your school and we\'ll put together\na tailored proposal — at no obligation.'
+                    .breaks(keep: isDesktop),
                 style: AppTypography.bodyL.copyWith(
                   color: kaizenInk.withValues(alpha: 0.65),
                 ),
@@ -808,37 +805,35 @@ class _CtaButtonState extends State<_CtaButton> {
   Widget build(BuildContext context) {
     return TapScale(
       child: Semantics(
-      label: 'Request a Proposal — navigate to Contact',
-      button: true,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
-        child: GestureDetector(
-          onTap: () => context.go('/contact'),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            constraints: const BoxConstraints(minHeight: 52, minWidth: 44),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.s40,
-              vertical: AppSpacing.s16,
-            ),
-            decoration: BoxDecoration(
-              color: _hovered
-                  ? kaizenInk.withValues(alpha: 0.88)
-                  : kaizenInk,
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              'Request a Proposal',
-              style: AppTypography.label.copyWith(
-                color: kaizenCream,
-                fontSize: 15,
+        label: 'Request a Proposal — navigate to Contact',
+        button: true,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onEnter: (_) => setState(() => _hovered = true),
+          onExit: (_) => setState(() => _hovered = false),
+          child: GestureDetector(
+            onTap: () => context.go('/contact'),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              constraints: const BoxConstraints(minHeight: 52, minWidth: 44),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.s40,
+                vertical: AppSpacing.s16,
+              ),
+              decoration: BoxDecoration(
+                color: _hovered ? kaizenInk.withValues(alpha: 0.88) : kaizenInk,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                'Request a Proposal',
+                style: AppTypography.label.copyWith(
+                  color: kaizenCream,
+                  fontSize: 15,
+                ),
               ),
             ),
           ),
         ),
-      ),
       ),
     );
   }

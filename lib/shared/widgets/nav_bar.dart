@@ -108,11 +108,9 @@ class _DesktopBar extends StatelessWidget {
 
     return Center(
       child: ConstrainedBox(
-        constraints:
-            const BoxConstraints(maxWidth: AppSpacing.maxContentWidth),
+        constraints: const BoxConstraints(maxWidth: AppSpacing.maxContentWidth),
         child: Padding(
-          padding:
-              const EdgeInsets.symmetric(horizontal: AppSpacing.s32),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s32),
           child: Stack(
             alignment: Alignment.center,
             children: [
@@ -136,10 +134,7 @@ class _DesktopBar extends StatelessWidget {
                 ],
               ),
               // Right — CTA pill
-              const Align(
-                alignment: Alignment.centerRight,
-                child: _CtaPill(),
-              ),
+              const Align(alignment: Alignment.centerRight, child: _CtaPill()),
             ],
           ),
         ),
@@ -277,48 +272,55 @@ class _NavLinkState extends State<_NavLink>
         child: GestureDetector(
           onTap: () => context.go(widget.path),
           child: Padding(
-            // 11 px each side → 44 px minimum tap target
+            // 11 px vertical padding covers the height half of the 44 px
+            // target; the ConstrainedBox below covers the width half —
+            // short labels like "Home" were under 44px wide without it.
             padding: const EdgeInsets.symmetric(vertical: 11),
-            child: IntrinsicWidth(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  AnimatedDefaultTextStyle(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeOut,
-                    style: GoogleFonts.interTight(
-                      fontSize: 14.5,
-                      fontWeight: FontWeight.w500,
-                      color: _hovered
-                          ? kaizenBlue
-                          : kaizenInk.withValues(alpha: 0.85),
-                      height: 1.0,
-                    ),
-                    child: Text(
-                      widget.label,
-                      softWrap: false,
-                      overflow: TextOverflow.visible,
-                      maxLines: 1,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  // Gold underline — Transform.scale avoids IntrinsicWidth NaN
-                  AnimatedBuilder(
-                    animation: _curved,
-                    builder: (_, __) => Transform.scale(
-                      scaleX: _curved.value,
-                      alignment: Alignment.centerLeft,
-                      child: Container(
-                        height: 2,
-                        decoration: BoxDecoration(
-                          color: kaizenGold,
-                          borderRadius: BorderRadius.circular(1),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 44),
+              child: Center(
+                child: IntrinsicWidth(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      AnimatedDefaultTextStyle(
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeOut,
+                        style: GoogleFonts.interTight(
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w500,
+                          color: _hovered
+                              ? kaizenBlue
+                              : kaizenInk.withValues(alpha: 0.85),
+                          height: 1.0,
+                        ),
+                        child: Text(
+                          widget.label,
+                          softWrap: false,
+                          overflow: TextOverflow.visible,
+                          maxLines: 1,
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 6),
+                      // Gold underline — Transform.scale avoids IntrinsicWidth NaN
+                      AnimatedBuilder(
+                        animation: _curved,
+                        builder: (_, __) => Transform.scale(
+                          scaleX: _curved.value,
+                          alignment: Alignment.centerLeft,
+                          child: Container(
+                            height: 2,
+                            decoration: BoxDecoration(
+                              color: kaizenGold,
+                              borderRadius: BorderRadius.circular(1),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -364,15 +366,15 @@ class _CtaPillState extends State<_CtaPill> {
                 duration: const Duration(milliseconds: 200),
                 curve: Curves.easeOut,
                 height: 44,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 22),
+                padding: const EdgeInsets.symmetric(horizontal: 22),
                 decoration: BoxDecoration(
                   color: _hovered ? kaizenBlue : kaizenInk,
                   borderRadius: BorderRadius.circular(999),
                   boxShadow: [
                     BoxShadow(
                       color: kaizenInk.withValues(
-                          alpha: _hovered ? 0.28 : 0.20),
+                        alpha: _hovered ? 0.28 : 0.20,
+                      ),
                       blurRadius: _hovered ? 18 : 10,
                       offset: const Offset(0, 3),
                     ),
@@ -407,10 +409,7 @@ class _CtaPillState extends State<_CtaPill> {
 // ---------------------------------------------------------------------------
 
 class _MobileBar extends StatefulWidget {
-  const _MobileBar({
-    required this.menuOpen,
-    required this.onMenuToggle,
-  });
+  const _MobileBar({required this.menuOpen, required this.onMenuToggle});
 
   final bool menuOpen;
   final VoidCallback onMenuToggle;
@@ -511,7 +510,10 @@ class _MobileMenuOverlayState extends State<MobileMenuOverlay>
       duration: const Duration(milliseconds: 500),
     );
     final reduceMotion = WidgetsBinding
-        .instance.platformDispatcher.accessibilityFeatures.reduceMotion;
+        .instance
+        .platformDispatcher
+        .accessibilityFeatures
+        .reduceMotion;
     if (reduceMotion) {
       _controller.value = 1.0;
     } else {
@@ -575,8 +577,11 @@ class _MobileMenuOverlayState extends State<MobileMenuOverlay>
                         width: 44,
                         height: 44,
                         alignment: Alignment.center,
-                        child: const Icon(Icons.close,
-                            size: 24, color: kaizenInk),
+                        child: const Icon(
+                          Icons.close,
+                          size: 24,
+                          color: kaizenInk,
+                        ),
                       ),
                     ),
                   ),
@@ -588,13 +593,17 @@ class _MobileMenuOverlayState extends State<MobileMenuOverlay>
               opacity: _stagger(0),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.s32, 0, AppSpacing.s32, AppSpacing.s12),
+                  AppSpacing.s32,
+                  0,
+                  AppSpacing.s32,
+                  AppSpacing.s12,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     GestureDetector(
-                      onTap: () => _launch(
-                          'mailto:thekaizensolutions.hyd@gmail.com'),
+                      onTap: () =>
+                          _launch('mailto:thekaizensolutions.hyd@gmail.com'),
                       child: Text(
                         'thekaizensolutions.hyd@gmail.com',
                         style: GoogleFonts.interTight(
@@ -639,20 +648,16 @@ class _MobileMenuOverlayState extends State<MobileMenuOverlay>
                 ),
               ),
             ),
-            Divider(
-                height: 1,
-                color: kaizenInk.withValues(alpha: 0.10)),
+            Divider(height: 1, color: kaizenInk.withValues(alpha: 0.10)),
             // ── Nav links ────────────────────────────────────────────────────
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.s32),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s32),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    for (int i = 0; i < _kNavLinks.length; i++)
-                      _buildLink(i),
+                    for (int i = 0; i < _kNavLinks.length; i++) _buildLink(i),
                   ],
                 ),
               ),

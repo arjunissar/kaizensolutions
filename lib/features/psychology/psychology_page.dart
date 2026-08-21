@@ -9,6 +9,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../shared/widgets/animated_reveal.dart';
 import '../../shared/widgets/page_scroll_view.dart';
+import 'widgets/pedagogy_glyphs.dart';
 
 class PsychologyPage extends StatelessWidget {
   const PsychologyPage({super.key});
@@ -68,13 +69,15 @@ class _HeroSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               AnimatedReveal(
+                // kaizenGold text on kaizenCream fails WCAG contrast
+                // (~1.4:1); kaizenBlueDeep is the same premium accent, safe.
                 child: Text(
                   'The Pedagogy',
                   style: GoogleFonts.fraunces(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                     height: 1.15,
-                    color: kaizenGold,
+                    color: kaizenBlueDeep,
                   ),
                 ),
               ),
@@ -82,7 +85,8 @@ class _HeroSection extends StatelessWidget {
               AnimatedReveal(
                 delay: const Duration(milliseconds: 80),
                 child: Text(
-                  'Designed the way\nstudents actually learn.',
+                  'Designed the way\nstudents actually learn.'
+                      .breaks(keep: screenW > Breakpoints.tablet),
                   style: GoogleFonts.fraunces(
                     fontSize: headlineSize,
                     fontWeight: FontWeight.w700,
@@ -95,8 +99,9 @@ class _HeroSection extends StatelessWidget {
               AnimatedReveal(
                 delay: const Duration(milliseconds: 160),
                 child: ConstrainedBox(
-                  constraints:
-                      const BoxConstraints(maxWidth: AppSpacing.maxReadingWidth),
+                  constraints: const BoxConstraints(
+                    maxWidth: AppSpacing.maxReadingWidth,
+                  ),
                   child: Text(
                     'Kaizen Notebooks are built on five established principles of learning '
                     'science — each translated into a specific design choice on the page.',
@@ -200,10 +205,7 @@ class _PrincipleCardsSection extends StatelessWidget {
                           index: i,
                         ),
                       )
-                    : _PrincipleCard(
-                        principle: _principles[i],
-                        index: i,
-                      ),
+                    : _PrincipleCard(principle: _principles[i], index: i),
               ),
               if (i < _principles.length - 1)
                 const SizedBox(height: AppSpacing.s32),
@@ -230,10 +232,7 @@ class _Principle {
 }
 
 class _PrincipleCard extends StatelessWidget {
-  const _PrincipleCard({
-    required this.principle,
-    required this.index,
-  });
+  const _PrincipleCard({required this.principle, required this.index});
 
   final _Principle principle;
   final int index;
@@ -257,15 +256,24 @@ class _PrincipleCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Numeral
-          Text(
-            principle.numeral,
-            style: GoogleFonts.fraunces(
-              fontSize: 56,
-              fontWeight: FontWeight.w700,
-              color: kaizenGold,
-              height: 1.0,
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Numeral — kaizenGold on kaizenCream fails WCAG contrast even
+              // at this large size; kaizenBlueDeep is the same premium
+              // accent, safe.
+              Text(
+                principle.numeral,
+                style: GoogleFonts.fraunces(
+                  fontSize: 56,
+                  fontWeight: FontWeight.w700,
+                  color: kaizenBlueDeep,
+                  height: 1.0,
+                ),
+              ),
+              const Spacer(),
+              PedagogyBadge(index: index),
+            ],
           ),
           const SizedBox(height: AppSpacing.s12),
           // Principle name
@@ -301,7 +309,7 @@ class _PrincipleCard extends StatelessWidget {
           Text(
             'APPLIED ON EVERY PAGE',
             style: AppTypography.caption.copyWith(
-              color: kaizenGold,
+              color: kaizenBlueDeep,
               letterSpacing: 1.8,
               fontWeight: FontWeight.w600,
             ),
@@ -431,9 +439,7 @@ class _ProcessDiagramState extends State<_ProcessDiagram>
     return VisibilityDetector(
       key: const Key('process-diagram'),
       onVisibilityChanged: _onVisible,
-      child: isDesktop
-          ? _buildHorizontal()
-          : _buildVertical(),
+      child: isDesktop ? _buildHorizontal() : _buildVertical(),
     );
   }
 
@@ -463,10 +469,7 @@ class _ProcessDiagramState extends State<_ProcessDiagram>
                     child: Align(
                       alignment: Alignment.centerLeft,
                       widthFactor: _lineAnim(i).value,
-                      child: Container(
-                        height: 2,
-                        color: kaizenBlue,
-                      ),
+                      child: Container(height: 2, color: kaizenBlue),
                     ),
                   ),
                 ),
@@ -500,11 +503,7 @@ class _ProcessDiagramState extends State<_ProcessDiagram>
                   child: Align(
                     alignment: Alignment.topCenter,
                     heightFactor: _lineAnim(i).value,
-                    child: Container(
-                      width: 2,
-                      height: 40,
-                      color: kaizenBlue,
-                    ),
+                    child: Container(width: 2, height: 40, color: kaizenBlue),
                   ),
                 ),
               ),
@@ -604,7 +603,9 @@ class _GroundingBand extends StatelessWidget {
             v: AppSpacing.s64,
             child: Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: AppSpacing.maxReadingWidth),
+                constraints: const BoxConstraints(
+                  maxWidth: AppSpacing.maxReadingWidth,
+                ),
                 child: AnimatedReveal(
                   child: Text(
                     'Every design decision in the Kaizen Notebook traces back to an '

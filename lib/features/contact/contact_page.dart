@@ -18,11 +18,7 @@ class ContactPage extends StatelessWidget {
     return const PageScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _HeroSection(),
-          _TwoColumnSection(),
-          _ReassuranceStrip(),
-        ],
+        children: [_HeroSection(), _TwoColumnSection(), _ReassuranceStrip()],
       ),
     );
   }
@@ -52,7 +48,9 @@ class _HeroSection extends StatelessWidget {
         ),
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: AppSpacing.maxReadingWidth),
+            constraints: const BoxConstraints(
+              maxWidth: AppSpacing.maxReadingWidth,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -119,7 +117,9 @@ class _TwoColumnSection extends StatelessWidget {
         ),
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: AppSpacing.maxContentWidth),
+            constraints: const BoxConstraints(
+              maxWidth: AppSpacing.maxContentWidth,
+            ),
             child: isDesktop
                 ? Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -209,22 +209,25 @@ class _EnquiryFormState extends State<_EnquiryForm> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final subject =
-        Uri.encodeComponent('Proposal Request — ${_schoolCtrl.text.trim()}');
-    final body = Uri.encodeComponent([
-      'Name: ${_nameCtrl.text.trim()}',
-      'Role: ${_roleCtrl.text.trim()}',
-      'School: ${_schoolCtrl.text.trim()}',
-      'Location: ${_locationCtrl.text.trim()}',
-      'Email: ${_emailCtrl.text.trim()}',
-      'Phone: ${_phoneCtrl.text.trim()}',
-      'Approximate Student Strength: $_strength',
-      'Classes: ${_classSelected.isEmpty ? "Not specified" : _classSelected.join(", ")}',
-      'Subjects: ${_subjectSelected.isEmpty ? "Not specified" : _subjectSelected.join(", ")}',
-      'Additional information:\n${_moreCtrl.text.trim()}',
-      '',
-      'Consent to contact: ${_consent ? "Yes" : "No"}',
-    ].join('\n'));
+    final subject = Uri.encodeComponent(
+      'Proposal Request — ${_schoolCtrl.text.trim()}',
+    );
+    final body = Uri.encodeComponent(
+      [
+        'Name: ${_nameCtrl.text.trim()}',
+        'Role: ${_roleCtrl.text.trim()}',
+        'School: ${_schoolCtrl.text.trim()}',
+        'Location: ${_locationCtrl.text.trim()}',
+        'Email: ${_emailCtrl.text.trim()}',
+        'Phone: ${_phoneCtrl.text.trim()}',
+        'Approximate Student Strength: $_strength',
+        'Classes: ${_classSelected.isEmpty ? "Not specified" : _classSelected.join(", ")}',
+        'Subjects: ${_subjectSelected.isEmpty ? "Not specified" : _subjectSelected.join(", ")}',
+        'Additional information:\n${_moreCtrl.text.trim()}',
+        '',
+        'Consent to contact: ${_consent ? "Yes" : "No"}',
+      ].join('\n'),
+    );
 
     final uri = Uri.parse(
       'mailto:thekaizensolutions.hyd@gmail.com?subject=$subject&body=$body',
@@ -311,8 +314,10 @@ class _EnquiryFormState extends State<_EnquiryForm> {
                 onChanged: (v) => setState(() => _strength = v!),
               ),
               const SizedBox(height: AppSpacing.s32),
-              _FieldLabel('Which classes are you exploring notebooks for?',
-                  required: false),
+              _FieldLabel(
+                'Which classes are you exploring notebooks for?',
+                required: false,
+              ),
               const SizedBox(height: AppSpacing.s12),
               _ChipGroup(
                 options: _classOptions,
@@ -416,9 +421,9 @@ class _KaizenTextFieldState extends State<KaizenTextField> {
             style: AppTypography.bodyM.copyWith(color: kaizenInk),
             decoration: InputDecoration(
               hintText: widget.hint,
-              hintStyle: AppTypography.bodyM.copyWith(
-                color: kaizenMuted.withValues(alpha: 0.6),
-              ),
+              // Full-opacity kaizenMuted: the 0.6-alpha version dropped to
+              // ~2.4:1 contrast on the cream fill, well under WCAG AA.
+              hintStyle: AppTypography.bodyM.copyWith(color: kaizenMuted),
               filled: true,
               fillColor: kaizenCream,
               contentPadding: const EdgeInsets.symmetric(
@@ -521,7 +526,10 @@ class _DropdownField extends StatelessWidget {
           .map(
             (o) => DropdownMenuItem(
               value: o,
-              child: Text(o, style: AppTypography.bodyM.copyWith(color: kaizenInk)),
+              child: Text(
+                o,
+                style: AppTypography.bodyM.copyWith(color: kaizenInk),
+              ),
             ),
           )
           .toList(),
@@ -567,7 +575,9 @@ class _ChipGroup extends StatelessWidget {
                 color: isSelected ? kaizenGold : kaizenCream,
                 borderRadius: BorderRadius.circular(100),
                 border: Border.all(
-                  color: isSelected ? kaizenGold : kaizenInk.withValues(alpha: 0.18),
+                  color: isSelected
+                      ? kaizenGold
+                      : kaizenInk.withValues(alpha: 0.18),
                   width: isSelected ? 2 : 1,
                 ),
               ),
@@ -598,7 +608,8 @@ class _ConsentRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: 'Consent checkbox: I\'d like Kaizen Solutions to contact me about this enquiry',
+      label:
+          'Consent checkbox: I\'d like Kaizen Solutions to contact me about this enquiry',
       checked: value,
       child: GestureDetector(
         onTap: () => onChanged(!value),
@@ -617,7 +628,9 @@ class _ConsentRow extends StatelessWidget {
                     color: value ? kaizenGold : kaizenCream,
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
-                      color: value ? kaizenGold : kaizenInk.withValues(alpha: 0.25),
+                      color: value
+                          ? kaizenGold
+                          : kaizenInk.withValues(alpha: 0.25),
                       width: value ? 2 : 1,
                     ),
                   ),
@@ -663,42 +676,42 @@ class _SubmitButtonState extends State<_SubmitButton> {
   Widget build(BuildContext context) {
     return TapScale(
       child: Semantics(
-      label: 'Send Enquiry',
-      button: true,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
-        child: GestureDetector(
-          onTap: widget.onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            constraints: const BoxConstraints(minHeight: 52, minWidth: 44),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.s40,
-              vertical: AppSpacing.s16,
-            ),
-            decoration: BoxDecoration(
-              color: _hovered ? kaizenGoldDeep : kaizenGold,
-              borderRadius: BorderRadius.circular(4),
-              boxShadow: [
-                BoxShadow(
-                  color: kaizenGold.withValues(alpha: _hovered ? 0.45 : 0.25),
-                  blurRadius: _hovered ? 20 : 10,
-                  offset: const Offset(0, 4),
+        label: 'Send Enquiry',
+        button: true,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onEnter: (_) => setState(() => _hovered = true),
+          onExit: (_) => setState(() => _hovered = false),
+          child: GestureDetector(
+            onTap: widget.onTap,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              constraints: const BoxConstraints(minHeight: 52, minWidth: 44),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.s40,
+                vertical: AppSpacing.s16,
+              ),
+              decoration: BoxDecoration(
+                color: _hovered ? kaizenGoldDeep : kaizenGold,
+                borderRadius: BorderRadius.circular(4),
+                boxShadow: [
+                  BoxShadow(
+                    color: kaizenGold.withValues(alpha: _hovered ? 0.45 : 0.25),
+                    blurRadius: _hovered ? 20 : 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Text(
+                'Send Enquiry',
+                style: AppTypography.label.copyWith(
+                  color: kaizenInk,
+                  fontSize: 15,
                 ),
-              ],
-            ),
-            child: Text(
-              'Send Enquiry',
-              style: AppTypography.label.copyWith(
-                color: kaizenInk,
-                fontSize: 15,
               ),
             ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -787,15 +800,9 @@ class _ContactPanel extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
-                _TapLink(
-                  label: '+91 9989828388',
-                  uri: 'tel:+919989828388',
-                ),
+                _TapLink(label: '+91 9989828388', uri: 'tel:+919989828388'),
                 SizedBox(height: AppSpacing.s4),
-                _TapLink(
-                  label: '+91 8686960105',
-                  uri: 'tel:+918686960105',
-                ),
+                _TapLink(label: '+91 8686960105', uri: 'tel:+918686960105'),
               ],
             ),
           ),
@@ -821,11 +828,7 @@ class _ContactPanel extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(
-                  Icons.schedule,
-                  size: 18,
-                  color: kaizenMuted,
-                ),
+                const Icon(Icons.schedule, size: 18, color: kaizenMuted),
                 const SizedBox(width: AppSpacing.s12),
                 Expanded(
                   child: Text(
@@ -921,12 +924,21 @@ class _TapLinkState extends State<_TapLink> {
         onExit: (_) => setState(() => _hovered = false),
         child: GestureDetector(
           onTap: () => launchUrl(Uri.parse(widget.uri)),
-          child: Text(
-            widget.label,
-            style: AppTypography.bodyM.copyWith(
-              color: _hovered ? kaizenBlueDeep : kaizenBlue,
-              decoration: TextDecoration.underline,
-              decorationColor: _hovered ? kaizenBlueDeep : kaizenBlue,
+          // ConstrainedBox: without it this tap target is only as tall as
+          // one line of body text, well under the 44px minimum — Footer's
+          // own _TapLink already enforces this; this one had drifted from it.
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 44),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                widget.label,
+                style: AppTypography.bodyM.copyWith(
+                  color: _hovered ? kaizenBlueDeep : kaizenBlue,
+                  decoration: TextDecoration.underline,
+                  decorationColor: _hovered ? kaizenBlueDeep : kaizenBlue,
+                ),
+              ),
             ),
           ),
         ),
@@ -961,14 +973,18 @@ class _ReassuranceStrip extends StatelessWidget {
         ),
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: AppSpacing.maxContentWidth),
+            constraints: const BoxConstraints(
+              maxWidth: AppSpacing.maxContentWidth,
+            ),
             child: AnimatedReveal(
               child: isDesktop
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         for (int i = 0; i < _items.length; i++) ...[
-                          Expanded(child: _ReassuranceItem(_items[i].$1, _items[i].$2)),
+                          Expanded(
+                            child: _ReassuranceItem(_items[i].$1, _items[i].$2),
+                          ),
                           if (i < _items.length - 1)
                             Container(
                               width: 1,

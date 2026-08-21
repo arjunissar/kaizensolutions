@@ -83,7 +83,9 @@ class _HeroSection extends StatelessWidget {
               AnimatedReveal(
                 delay: const Duration(milliseconds: 80),
                 child: Text(
-                  'Built by a teacher.\nFor teachers.\nFor students.',
+                  'Built by a teacher.\nFor teachers.\nFor students.'.breaks(
+                    keep: screenW > Breakpoints.tablet,
+                  ),
                   style: GoogleFonts.fraunces(
                     fontSize: headlineSize,
                     fontWeight: FontWeight.w700,

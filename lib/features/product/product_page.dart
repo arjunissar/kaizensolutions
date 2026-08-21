@@ -34,7 +34,10 @@ class ProductPage extends StatelessWidget {
 // Layout helpers
 // ---------------------------------------------------------------------------
 
-Widget _constrained({required Widget child, double max = AppSpacing.maxContentWidth}) {
+Widget _constrained({
+  required Widget child,
+  double max = AppSpacing.maxContentWidth,
+}) {
   return Center(
     child: ConstrainedBox(
       constraints: BoxConstraints(maxWidth: max),
@@ -105,17 +108,21 @@ class _HeroText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = MediaQuery.sizeOf(context).width > Breakpoints.tablet;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AnimatedReveal(
+          // kaizenGold text on the kaizenCream hero fails WCAG contrast
+          // (~1.4:1); kaizenBlueDeep reads as the same premium accent.
           child: Text(
             'The Notebook',
             style: GoogleFonts.fraunces(
               fontSize: 18,
               fontWeight: FontWeight.w600,
               height: 1.15,
-              color: kaizenGold,
+              color: kaizenBlueDeep,
             ),
           ),
         ),
@@ -123,7 +130,7 @@ class _HeroText extends StatelessWidget {
         AnimatedReveal(
           delay: const Duration(milliseconds: 80),
           child: Text(
-            'Not a textbook.\nNot a blank book.\nBoth.',
+            'Not a textbook.\nNot a blank book.\nBoth.'.breaks(keep: isDesktop),
             style: GoogleFonts.fraunces(
               fontSize: headlineSize,
               fontWeight: FontWeight.w700,
@@ -136,7 +143,9 @@ class _HeroText extends StatelessWidget {
         AnimatedReveal(
           delay: const Duration(milliseconds: 160),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: AppSpacing.maxReadingWidth),
+            constraints: const BoxConstraints(
+              maxWidth: AppSpacing.maxReadingWidth,
+            ),
             child: Text(
               'Each Kaizen Notebook combines curriculum-aligned concept pages '
               'with high-quality ruled pages — class-specific, subject-specific, '
@@ -165,54 +174,67 @@ class _NotebookIllustrationState extends State<_NotebookIllustration> {
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.sizeOf(context).width > Breakpoints.tablet;
-    final pageW = isDesktop ? 220.0 : 160.0;
-    final pageH = pageW * 1.40;
+    final idealPageW = isDesktop ? 220.0 : 160.0;
 
-    return Semantics(
-      label: 'Illustration of a Kaizen notebook open to its concept and notes pages',
-      child: MouseRegion(
-        cursor: SystemMouseCursors.basic,
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
-        child: AnimatedRotation(
-          duration: const Duration(milliseconds: 350),
-          turns: _hovered ? 2.0 / 360.0 : 0.0,
-          child: Container(
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  color: kaizenInk.withValues(alpha: _hovered ? 0.18 : 0.10),
-                  blurRadius: _hovered ? 40 : 24,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _ConceptPage(width: pageW, height: pageH),
-                  Container(
-                    width: 3,
-                    height: pageH,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          kaizenInk.withValues(alpha: 0.12),
-                          kaizenInk.withValues(alpha: 0.04),
-                          kaizenInk.withValues(alpha: 0.12),
-                        ],
+    // Two pages + a 3px spine must fit whatever width this widget is
+    // actually given — on a ~360-390px phone that's narrower than the
+    // 160px-per-page ideal (2*160+3 = 323px), which used to clip/overflow.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxPageW = (constraints.maxWidth - 3) / 2;
+        final pageW = maxPageW < idealPageW ? maxPageW : idealPageW;
+        final pageH = pageW * 1.40;
+
+        return Semantics(
+          label:
+              'Illustration of a Kaizen notebook open to its concept and notes pages',
+          child: MouseRegion(
+            cursor: SystemMouseCursors.basic,
+            onEnter: (_) => setState(() => _hovered = true),
+            onExit: (_) => setState(() => _hovered = false),
+            child: AnimatedRotation(
+              duration: const Duration(milliseconds: 350),
+              turns: _hovered ? 2.0 / 360.0 : 0.0,
+              child: Container(
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: kaizenInk.withValues(
+                        alpha: _hovered ? 0.18 : 0.10,
                       ),
+                      blurRadius: _hovered ? 40 : 24,
+                      offset: const Offset(0, 10),
                     ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _ConceptPage(width: pageW, height: pageH),
+                      Container(
+                        width: 3,
+                        height: pageH,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              kaizenInk.withValues(alpha: 0.12),
+                              kaizenInk.withValues(alpha: 0.04),
+                              kaizenInk.withValues(alpha: 0.12),
+                            ],
+                          ),
+                        ),
+                      ),
+                      _NotesPage(width: pageW, height: pageH),
+                    ],
                   ),
-                  _NotesPage(width: pageW, height: pageH),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -239,13 +261,24 @@ class _ConceptPage extends StatelessWidget {
           // Top accent + chapter title
           Container(height: 3, width: width * 0.35, color: kaizenBlue),
           SizedBox(height: gap * 0.6),
-          _MockLine(width: width * 0.55, height: lineH * 1.3, color: kaizenInk.withValues(alpha: 0.2)),
+          _MockLine(
+            width: width * 0.55,
+            height: lineH * 1.3,
+            color: kaizenInk.withValues(alpha: 0.2),
+          ),
           SizedBox(height: gap * 0.4),
-          _MockLine(width: width * 0.38, height: lineH, color: kaizenInk.withValues(alpha: 0.12)),
+          _MockLine(
+            width: width * 0.38,
+            height: lineH,
+            color: kaizenInk.withValues(alpha: 0.12),
+          ),
           SizedBox(height: gap),
           // Key Idea badge
           Container(
-            padding: EdgeInsets.symmetric(horizontal: p * 0.55, vertical: p * 0.22),
+            padding: EdgeInsets.symmetric(
+              horizontal: p * 0.55,
+              vertical: p * 0.22,
+            ),
             decoration: BoxDecoration(
               color: kaizenGold,
               borderRadius: BorderRadius.circular(3),
@@ -262,11 +295,23 @@ class _ConceptPage extends StatelessWidget {
           ),
           SizedBox(height: gap * 0.8),
           // Summary text lines
-          _MockLine(width: width * 0.82, height: lineH, color: kaizenInk.withValues(alpha: 0.13)),
+          _MockLine(
+            width: width * 0.82,
+            height: lineH,
+            color: kaizenInk.withValues(alpha: 0.13),
+          ),
           SizedBox(height: gap * 0.5),
-          _MockLine(width: width * 0.68, height: lineH, color: kaizenInk.withValues(alpha: 0.13)),
+          _MockLine(
+            width: width * 0.68,
+            height: lineH,
+            color: kaizenInk.withValues(alpha: 0.13),
+          ),
           SizedBox(height: gap * 0.5),
-          _MockLine(width: width * 0.75, height: lineH, color: kaizenInk.withValues(alpha: 0.13)),
+          _MockLine(
+            width: width * 0.75,
+            height: lineH,
+            color: kaizenInk.withValues(alpha: 0.13),
+          ),
           SizedBox(height: gap),
           // Mini diagram — 3-box hierarchy
           _MiniDiagram(width: width - p * 2),
@@ -284,7 +329,11 @@ class _ConceptPage extends StatelessWidget {
 }
 
 class _MockLine extends StatelessWidget {
-  const _MockLine({required this.width, required this.height, required this.color});
+  const _MockLine({
+    required this.width,
+    required this.height,
+    required this.color,
+  });
   final double width;
   final double height;
   final Color color;
@@ -294,7 +343,10 @@ class _MockLine extends StatelessWidget {
     return Container(
       width: width,
       height: height,
-      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2)),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(2),
+      ),
     );
   }
 }
@@ -311,7 +363,10 @@ class _MockBullet extends StatelessWidget {
         Container(
           width: 5,
           height: 5,
-          decoration: const BoxDecoration(shape: BoxShape.circle, color: kaizenGold),
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: kaizenGold,
+          ),
         ),
         SizedBox(width: width * 0.05),
         _MockLine(
@@ -576,7 +631,9 @@ class _FeatureRow extends StatelessWidget {
 
     final iconCard = Expanded(
       flex: 4,
-      child: Center(child: _FeatureIconCard(icon: icon, title: title)),
+      child: Center(
+        child: _FeatureIconCard(icon: icon, title: title),
+      ),
     );
     final copy = Expanded(
       flex: 6,
@@ -649,10 +706,7 @@ class _FeatureCopy extends StatelessWidget {
       children: [
         Text(title, style: AppTypography.headingM.copyWith(color: kaizenInk)),
         const SizedBox(height: AppSpacing.s16),
-        Text(
-          body,
-          style: AppTypography.bodyL.copyWith(color: kaizenMuted),
-        ),
+        Text(body, style: AppTypography.bodyL.copyWith(color: kaizenMuted)),
       ],
     );
   }
@@ -666,18 +720,12 @@ class _ReplacesSection extends StatelessWidget {
   const _ReplacesSection();
 
   static const _cards = [
-    (
-      'Reference Book',
-      'Concept summaries, in context.',
-    ),
+    ('Reference Book', 'Concept summaries, in context.'),
     (
       'Supplementary Guide',
       'Visuals and prompts on the same page as the notes.',
     ),
-    (
-      'Plain Notebook',
-      'Premium paper and structured writing space.',
-    ),
+    ('Plain Notebook', 'Premium paper and structured writing space.'),
   ];
 
   @override
@@ -815,7 +863,9 @@ class _CbseSection extends StatelessWidget {
                     child: AnimatedReveal(
                       child: Text(
                         'Built around\nthe CBSE\ncurriculum.',
-                        style: AppTypography.displayM.copyWith(color: kaizenGold),
+                        style: AppTypography.displayM.copyWith(
+                          color: kaizenGold,
+                        ),
                       ),
                     ),
                   ),
@@ -885,12 +935,7 @@ class _BifurcationsSection extends StatelessWidget {
       'History · Geography',
       'Civics & Economics',
     ),
-    (
-      Icons.translate,
-      'English',
-      'Grammar · Creative Writing',
-      '',
-    ),
+    (Icons.translate, 'English', 'Grammar · Creative Writing', ''),
     (
       Icons.calendar_today,
       'Term-wise',
@@ -996,7 +1041,8 @@ class _BifurcationsSection extends StatelessWidget {
                         secondary: _cards[i].$4,
                       ),
                     ),
-                    if (i < _cards.length - 1) const SizedBox(height: AppSpacing.s16),
+                    if (i < _cards.length - 1)
+                      const SizedBox(height: AppSpacing.s16),
                   ],
                 ],
               ),
@@ -1041,7 +1087,12 @@ class _BifurcationCard extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: kaizenGold,
                 ),
-                child: Icon(icon, size: 18, color: kaizenBlue, semanticLabel: null),
+                child: Icon(
+                  icon,
+                  size: 18,
+                  color: kaizenBlue,
+                  semanticLabel: null,
+                ),
               ),
               const SizedBox(width: AppSpacing.s12),
               Text(
@@ -1051,10 +1102,7 @@ class _BifurcationCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.s16),
-          Text(
-            primary,
-            style: AppTypography.bodyM.copyWith(color: kaizenInk),
-          ),
+          Text(primary, style: AppTypography.bodyM.copyWith(color: kaizenInk)),
           if (secondary.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.s4),
             Text(
@@ -1077,6 +1125,8 @@ class _ClosingCtaSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = MediaQuery.sizeOf(context).width > Breakpoints.tablet;
+
     return Container(
       color: kaizenGold,
       padding: const EdgeInsets.symmetric(
@@ -1089,7 +1139,9 @@ class _ClosingCtaSection extends StatelessWidget {
           children: [
             AnimatedReveal(
               child: Text(
-                'Want to see sample pages\nfor your grade?',
+                'Want to see sample pages\nfor your grade?'.breaks(
+                  keep: isDesktop,
+                ),
                 style: GoogleFonts.fraunces(
                   fontSize: 36,
                   fontWeight: FontWeight.w700,
@@ -1104,7 +1156,9 @@ class _ClosingCtaSection extends StatelessWidget {
               delay: const Duration(milliseconds: 60),
               child: Text(
                 'We\'ll put together a tailored sample for your school.',
-                style: AppTypography.bodyL.copyWith(color: kaizenInk.withValues(alpha: 0.65)),
+                style: AppTypography.bodyL.copyWith(
+                  color: kaizenInk.withValues(alpha: 0.65),
+                ),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -1147,9 +1201,7 @@ class _GoldCtaButtonState extends State<_GoldCtaButton> {
               vertical: AppSpacing.s16,
             ),
             decoration: BoxDecoration(
-              color: _hovered
-                  ? kaizenInk.withValues(alpha: 0.88)
-                  : kaizenInk,
+              color: _hovered ? kaizenInk.withValues(alpha: 0.88) : kaizenInk,
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(

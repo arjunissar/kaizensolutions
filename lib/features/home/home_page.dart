@@ -134,54 +134,44 @@ class _HeroSectionState extends State<_HeroSection>
     return MouseRegion(
       onHover: showGlow ? (e) => _mousePos.value = e.localPosition : null,
       child: Container(
-      constraints: BoxConstraints(minHeight: heroHeight),
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          center: const Alignment(0.65, -0.75),
-          radius: 1.15,
-          colors: [
-            kaizenGold.withValues(alpha: 0.20),
-            kaizenCream,
+        constraints: BoxConstraints(minHeight: heroHeight),
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            center: const Alignment(0.65, -0.75),
+            radius: 1.15,
+            colors: [kaizenGold.withValues(alpha: 0.20), kaizenCream],
+          ),
+        ),
+        child: Stack(
+          children: [
+            // Grain overlay
+            Positioned.fill(child: CustomPaint(painter: _GrainPainter())),
+            // Cursor glow (desktop only, reduced-motion aware)
+            if (showGlow)
+              Positioned.fill(
+                child: IgnorePointer(child: _GlowLayer(mousePos: _mousePos)),
+              ),
+            _section(
+              padding: EdgeInsets.symmetric(
+                horizontal: AppSpacing.s32,
+                vertical: isDesktop ? AppSpacing.s96 : AppSpacing.s64,
+              ),
+              child: isDesktop
+                  ? Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          flex: 7,
+                          child: _HeroLeftCol(stagger: _stagger),
+                        ),
+                        const SizedBox(width: AppSpacing.s64),
+                        const Expanded(flex: 5, child: HeroMotion()),
+                      ],
+                    )
+                  : _HeroLeftCol(stagger: _stagger),
+            ),
           ],
         ),
-      ),
-      child: Stack(
-        children: [
-          // Grain overlay
-          Positioned.fill(
-            child: CustomPaint(painter: _GrainPainter()),
-          ),
-          // Cursor glow (desktop only, reduced-motion aware)
-          if (showGlow)
-            Positioned.fill(
-              child: IgnorePointer(
-                child: _GlowLayer(mousePos: _mousePos),
-              ),
-            ),
-          _section(
-            padding: EdgeInsets.symmetric(
-              horizontal: AppSpacing.s32,
-              vertical: isDesktop ? AppSpacing.s96 : AppSpacing.s64,
-            ),
-            child: isDesktop
-                ? Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        flex: 7,
-                        child: _HeroLeftCol(stagger: _stagger),
-                      ),
-                      const SizedBox(width: AppSpacing.s64),
-                      const Expanded(
-                        flex: 5,
-                        child: HeroMotion(),
-                      ),
-                    ],
-                  )
-                : _HeroLeftCol(stagger: _stagger),
-          ),
-        ],
-      ),
       ),
     );
   }
@@ -190,22 +180,86 @@ class _HeroSectionState extends State<_HeroSection>
 // Deterministic grain dots — fixed positions so paint never changes
 class _GrainPainter extends CustomPainter {
   static const _pts = [
-    (0.04, 0.09), (0.11, 0.28), (0.07, 0.52), (0.19, 0.74), (0.03, 0.91),
-    (0.24, 0.14), (0.31, 0.38), (0.28, 0.63), (0.37, 0.87), (0.22, 0.97),
-    (0.44, 0.06), (0.51, 0.31), (0.47, 0.55), (0.58, 0.78), (0.41, 0.82),
-    (0.63, 0.11), (0.69, 0.42), (0.72, 0.66), (0.65, 0.89), (0.77, 0.04),
-    (0.83, 0.24), (0.88, 0.49), (0.91, 0.71), (0.96, 0.16), (0.80, 0.93),
-    (0.13, 0.44), (0.35, 0.22), (0.56, 0.58), (0.74, 0.35), (0.92, 0.85),
-    (0.08, 0.77), (0.29, 0.05), (0.49, 0.19), (0.67, 0.53), (0.85, 0.69),
-    (0.17, 0.61), (0.39, 0.83), (0.54, 0.41), (0.71, 0.13), (0.93, 0.37),
-    (0.02, 0.33), (0.15, 0.88), (0.43, 0.07), (0.60, 0.95), (0.78, 0.27),
-    (0.21, 0.49), (0.46, 0.72), (0.62, 0.20), (0.88, 0.57), (0.99, 0.44),
-    (0.10, 0.17), (0.32, 0.66), (0.53, 0.34), (0.76, 0.80), (0.94, 0.10),
-    (0.06, 0.58), (0.26, 0.29), (0.50, 0.88), (0.70, 0.48), (0.87, 0.22),
-    (0.14, 0.70), (0.38, 0.11), (0.57, 0.79), (0.82, 0.39), (0.97, 0.63),
-    (0.09, 0.40), (0.33, 0.57), (0.48, 0.26), (0.66, 0.91), (0.84, 0.05),
-    (0.18, 0.83), (0.42, 0.47), (0.61, 0.15), (0.79, 0.60), (0.95, 0.76),
-    (0.05, 0.23), (0.27, 0.72), (0.55, 0.50), (0.73, 0.08), (0.90, 0.34),
+    (0.04, 0.09),
+    (0.11, 0.28),
+    (0.07, 0.52),
+    (0.19, 0.74),
+    (0.03, 0.91),
+    (0.24, 0.14),
+    (0.31, 0.38),
+    (0.28, 0.63),
+    (0.37, 0.87),
+    (0.22, 0.97),
+    (0.44, 0.06),
+    (0.51, 0.31),
+    (0.47, 0.55),
+    (0.58, 0.78),
+    (0.41, 0.82),
+    (0.63, 0.11),
+    (0.69, 0.42),
+    (0.72, 0.66),
+    (0.65, 0.89),
+    (0.77, 0.04),
+    (0.83, 0.24),
+    (0.88, 0.49),
+    (0.91, 0.71),
+    (0.96, 0.16),
+    (0.80, 0.93),
+    (0.13, 0.44),
+    (0.35, 0.22),
+    (0.56, 0.58),
+    (0.74, 0.35),
+    (0.92, 0.85),
+    (0.08, 0.77),
+    (0.29, 0.05),
+    (0.49, 0.19),
+    (0.67, 0.53),
+    (0.85, 0.69),
+    (0.17, 0.61),
+    (0.39, 0.83),
+    (0.54, 0.41),
+    (0.71, 0.13),
+    (0.93, 0.37),
+    (0.02, 0.33),
+    (0.15, 0.88),
+    (0.43, 0.07),
+    (0.60, 0.95),
+    (0.78, 0.27),
+    (0.21, 0.49),
+    (0.46, 0.72),
+    (0.62, 0.20),
+    (0.88, 0.57),
+    (0.99, 0.44),
+    (0.10, 0.17),
+    (0.32, 0.66),
+    (0.53, 0.34),
+    (0.76, 0.80),
+    (0.94, 0.10),
+    (0.06, 0.58),
+    (0.26, 0.29),
+    (0.50, 0.88),
+    (0.70, 0.48),
+    (0.87, 0.22),
+    (0.14, 0.70),
+    (0.38, 0.11),
+    (0.57, 0.79),
+    (0.82, 0.39),
+    (0.97, 0.63),
+    (0.09, 0.40),
+    (0.33, 0.57),
+    (0.48, 0.26),
+    (0.66, 0.91),
+    (0.84, 0.05),
+    (0.18, 0.83),
+    (0.42, 0.47),
+    (0.61, 0.15),
+    (0.79, 0.60),
+    (0.95, 0.76),
+    (0.05, 0.23),
+    (0.27, 0.72),
+    (0.55, 0.50),
+    (0.73, 0.08),
+    (0.90, 0.34),
   ];
 
   @override
@@ -214,8 +268,7 @@ class _GrainPainter extends CustomPainter {
       ..color = const Color(0xFF000000).withValues(alpha: 0.035)
       ..style = PaintingStyle.fill;
     for (final (fx, fy) in _pts) {
-      canvas.drawCircle(
-          Offset(fx * size.width, fy * size.height), 1.4, paint);
+      canvas.drawCircle(Offset(fx * size.width, fy * size.height), 1.4, paint);
     }
   }
 
@@ -240,12 +293,13 @@ class _GlowLayerState extends State<_GlowLayer>
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    )
-      ..addListener(_onFrame)
-      ..repeat();
+    _ctrl =
+        AnimationController(
+            vsync: this,
+            duration: const Duration(milliseconds: 500),
+          )
+          ..addListener(_onFrame)
+          ..repeat();
   }
 
   void _onFrame() {
@@ -313,10 +367,12 @@ class _HeroLeftCol extends StatelessWidget {
             children: [
               Container(width: 4, height: 4, color: kaizenGold),
               const SizedBox(width: AppSpacing.s8),
+              // kaizenGold text on kaizenCream fails WCAG contrast (~1.4:1);
+              // kaizenBlueDeep reads as the same premium accent at ~13:1.
               Text(
                 'KAIZEN SOLUTIONS NOTEBOOKS',
                 style: AppTypography.caption.copyWith(
-                  color: kaizenGold,
+                  color: kaizenBlueDeep,
                   letterSpacing: 1.5,
                   fontWeight: FontWeight.w600,
                 ),
@@ -359,7 +415,9 @@ class _HeroLeftCol extends StatelessWidget {
         stagger(
           2,
           ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: AppSpacing.maxReadingWidth),
+            constraints: const BoxConstraints(
+              maxWidth: AppSpacing.maxReadingWidth,
+            ),
             child: Text(
               'Curriculum-aligned notebooks that merge concept clarity, '
               'visual learning, and structured note-taking — designed for CBSE schools.',
@@ -519,8 +577,7 @@ class _PhilosophyBandState extends State<_PhilosophyBand> {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop =
-        MediaQuery.sizeOf(context).width > Breakpoints.tablet;
+    final isDesktop = MediaQuery.sizeOf(context).width > Breakpoints.tablet;
 
     return VisibilityDetector(
       key: const Key('philosophy-band'),
@@ -542,7 +599,8 @@ class _PhilosophyBandState extends State<_PhilosophyBand> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  '“Kaizen — the quiet discipline of becoming\na little better, every single day.”',
+                  '“Kaizen — the quiet discipline of becoming\na little better, every single day.”'
+                      .breaks(keep: isDesktop),
                   style: GoogleFonts.fraunces(
                     fontSize: isDesktop ? 28 : 22,
                     fontWeight: FontWeight.w600,
@@ -610,8 +668,7 @@ class _WhatItIsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop =
-        MediaQuery.sizeOf(context).width > Breakpoints.tablet;
+    final isDesktop = MediaQuery.sizeOf(context).width > Breakpoints.tablet;
 
     return ColoredBox(
       color: kaizenCream,
@@ -629,7 +686,9 @@ class _WhatItIsSection extends StatelessWidget {
             AnimatedReveal(
               delay: const Duration(milliseconds: 80),
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: AppSpacing.maxReadingWidth),
+                constraints: const BoxConstraints(
+                  maxWidth: AppSpacing.maxReadingWidth,
+                ),
                 child: Text(
                   'We fused concept clarity, visual learning, and writing practice into a single tool.',
                   style: AppTypography.bodyL.copyWith(color: kaizenMuted),
@@ -716,9 +775,7 @@ class _WhatItIsCardState extends State<_WhatItIsCard> {
         decoration: BoxDecoration(
           color: kaizenPaper,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: kaizenInk.withValues(alpha: 0.07),
-          ),
+          border: Border.all(color: kaizenInk.withValues(alpha: 0.07)),
           boxShadow: [
             BoxShadow(
               color: kaizenInk.withValues(alpha: _hovered ? 0.10 : 0.04),
@@ -811,37 +868,36 @@ class _StatsStrip extends StatelessWidget {
                     ),
                   )
                 : isMobile
-                    ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          for (int i = 0; i < _stats.length; i++) ...[
-                            if (i > 0)
-                              const SizedBox(height: AppSpacing.s32),
-                            _Stat(
-                              value: _stats[i].$1,
-                              unit: _stats[i].$2,
-                              description: _stats[i].$3,
-                              valueFontSize: 40,
-                              horizontalPadding: 0,
-                            ),
-                          ],
-                        ],
-                      )
-                    : Wrap(
-                        spacing: AppSpacing.s32,
-                        runSpacing: AppSpacing.s32,
-                        children: [
-                          for (final s in _stats)
-                            SizedBox(
-                              width: (width - 80) / 2,
-                              child: _Stat(
-                                value: s.$1,
-                                unit: s.$2,
-                                description: s.$3,
-                              ),
-                            ),
-                        ],
-                      ),
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (int i = 0; i < _stats.length; i++) ...[
+                        if (i > 0) const SizedBox(height: AppSpacing.s32),
+                        _Stat(
+                          value: _stats[i].$1,
+                          unit: _stats[i].$2,
+                          description: _stats[i].$3,
+                          valueFontSize: 40,
+                          horizontalPadding: 0,
+                        ),
+                      ],
+                    ],
+                  )
+                : Wrap(
+                    spacing: AppSpacing.s32,
+                    runSpacing: AppSpacing.s32,
+                    children: [
+                      for (final s in _stats)
+                        SizedBox(
+                          width: (width - 80) / 2,
+                          child: _Stat(
+                            value: s.$1,
+                            unit: s.$2,
+                            description: s.$3,
+                          ),
+                        ),
+                    ],
+                  ),
           ),
           const Divider(height: 1, color: kaizenPaper),
         ],
@@ -873,13 +929,16 @@ class _Stat extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
+          // kaizenGold text on the kaizenCream strip background fails WCAG
+          // contrast (~1.4:1, even at large-text size); kaizenBlueDeep reads
+          // as the same premium accent at a safe ratio.
           Text(
             value,
             style: GoogleFonts.fraunces(
               fontSize: valueFontSize,
               fontWeight: FontWeight.w700,
               height: 1.0,
-              color: kaizenGold,
+              color: kaizenBlueDeep,
               fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
@@ -912,6 +971,8 @@ class _FinalCtaSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = MediaQuery.sizeOf(context).width > Breakpoints.tablet;
+
     return Container(
       constraints: const BoxConstraints(minHeight: 360),
       decoration: const BoxDecoration(
@@ -928,7 +989,8 @@ class _FinalCtaSection extends StatelessWidget {
             children: [
               AnimatedReveal(
                 child: Text(
-                  'Ready to see what your\nstudents could hold\nin their hands?',
+                  'Ready to see what your\nstudents could hold\nin their hands?'
+                      .breaks(keep: isDesktop),
                   style: AppTypography.displayM.copyWith(color: kaizenInk),
                   textAlign: TextAlign.center,
                 ),
@@ -958,42 +1020,42 @@ class _FinalCtaButtonState extends State<_FinalCtaButton> {
   Widget build(BuildContext context) {
     return TapScale(
       child: Semantics(
-      label: 'Request a Proposal',
-      button: true,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
-        child: GestureDetector(
-          onTap: () => context.go('/contact'),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            constraints: const BoxConstraints(minHeight: 56, minWidth: 44),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.s48,
-              vertical: AppSpacing.s16,
-            ),
-            decoration: BoxDecoration(
-              color: _hovered ? kaizenGoldDeep : kaizenGold,
-              borderRadius: BorderRadius.circular(4),
-              boxShadow: [
-                BoxShadow(
-                  color: kaizenGold.withValues(alpha: _hovered ? 0.45 : 0.25),
-                  blurRadius: _hovered ? 20 : 10,
-                  offset: const Offset(0, 4),
+        label: 'Request a Proposal',
+        button: true,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onEnter: (_) => setState(() => _hovered = true),
+          onExit: (_) => setState(() => _hovered = false),
+          child: GestureDetector(
+            onTap: () => context.go('/contact'),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              constraints: const BoxConstraints(minHeight: 56, minWidth: 44),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.s48,
+                vertical: AppSpacing.s16,
+              ),
+              decoration: BoxDecoration(
+                color: _hovered ? kaizenGoldDeep : kaizenGold,
+                borderRadius: BorderRadius.circular(4),
+                boxShadow: [
+                  BoxShadow(
+                    color: kaizenGold.withValues(alpha: _hovered ? 0.45 : 0.25),
+                    blurRadius: _hovered ? 20 : 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Text(
+                'Request a Proposal',
+                style: AppTypography.label.copyWith(
+                  color: kaizenInk,
+                  fontSize: 16,
                 ),
-              ],
-            ),
-            child: Text(
-              'Request a Proposal',
-              style: AppTypography.label.copyWith(
-                color: kaizenInk,
-                fontSize: 16,
               ),
             ),
           ),
         ),
-      ),
       ),
     );
   }
